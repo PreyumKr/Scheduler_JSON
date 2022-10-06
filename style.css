@@ -1,0 +1,11 @@
+.caseheading {
+    margin-left: 8%;
+}
+
+.container .table {
+    width: 100% !important;
+}
+
+td, th {
+    text-align: center;
+}

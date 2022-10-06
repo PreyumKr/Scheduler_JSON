@@ -1,0 +1,133 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduler</title>
+    <!-- jquery and ajax import -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Bootstrap import -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="d-flex align-items-center justify-content-center mt-3">
+        <div class="card w-50">
+            <div class="card-body ">
+                <h2>Add New Schedule</h2>
+                <form id="Schedule-form" method="post">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="phone" name="phone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="time" class="form-label">Time (hh:00 or hh:30)</label>
+                        <input type="time" required step="1800" class="form-control" id="time" name="time">
+                    </div>
+                    <div class="mb-3">
+                        <label for="duration" class="form-label">Duration</label><br>
+                        <input type="radio" class="radio" id="duration30" name="duration" value="30">
+                        <label for="30" class="form-label">30 Minutes</label><br>
+                        <input type="radio" class="radio" id="duration60" name="duration" value="60">
+                        <label for="60" class="form-label">60 Minutes</label>
+                        <p id="check"></p>
+                    </div>
+                    <button id="subbtn" type="button" class="btn btn-primary">Submit</button> 
+                  </form>
+            </div>
+            <p style="padding-left: 14px;" id="result"></p>
+          </div>
+    </div>
+
+    <script>
+        // Event Listener for submit button
+        document.getElementById("subbtn").addEventListener("click", sendmsg);
+
+        // send message function
+        function sendmsg() {
+
+            // Form Validation detection
+            
+            // Name Validation
+            var check1 = $('#name')[0].checkValidity();
+            // Phone Number Validation
+            var check2 = $('#phone')[0].checkValidity();
+            // Chosen Time Validation
+            var check3 = $('#time')[0].checkValidity();
+            var check4;
+            // Duration radio button validation
+            var checked_time = document.querySelector('input[name = "duration"]:checked');
+            if (checked_time != null)
+                check4 = true;
+            else
+                check4 = false;
+                
+            // Form Validation reporting validity
+            
+            // Name Validation
+            if(!check1)
+                $('#name')[0].reportValidity();
+            // Phone Number Validation
+            else if(!check2)
+                $('#phone')[0].reportValidity();
+            // Chosen Time Validation
+            else if(!check3)
+                $('#time')[0].reportValidity();
+            // Duration radio button validation
+            else if(!check4)
+                $('#check').html("Select atleast one option!")
+            else
+            {
+                // Form data stored in variables
+                var name = document.getElementById('name').value;
+                var phone = document.getElementById('phone').value;
+                var time = document.getElementById('time').value;
+                var duration = document.querySelector('input[name="duration"]:checked').value;
+
+                // seperate the hour and minute and convert them into integer
+                var hr = +(time[0]+time[1]);
+                var min = +(time[3]+time[4]);
+                
+                // convert the start time into unixtimestamp
+                var u_time_start = Math.floor(new Date().setHours(hr,min,00,00) / 1000);
+
+                // duration addition
+                if(+(duration) == 30)
+                    if(min == 30)
+                    {
+                        hr = hr+1;
+                        min = min-30;
+                    }
+                    else
+                        min = min+30;
+                else
+                    hr = hr+1;
+                
+                // convert the end time into unixtimestamp
+                var u_time_end = Math.floor(new Date().setHours(hr,min,00,00) / 1000) - 1;
+
+                console.log(u_time_start)
+                console.log(u_time_end)
+                
+                // Form data sent through ajax to php server
+                $.ajax({
+                    type: 'POST',
+                    url: 'server.php',
+                    data: {name: name, phone: phone, us_timestamp: u_time_start, ue_timestamp: u_time_end},
+                    success: function(res){
+                        $('#result').html(res);
+                        console.log(res);
+                }
+                });
+            document.getElementById('Schedule-form').reset();
+            }
+        }
+    </script>
+</body>
+
+</html>
