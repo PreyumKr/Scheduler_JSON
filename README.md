@@ -1,5 +1,5 @@
 # Scheduler_JSON
-Assignment made during an Internship application on Internshala.
+Assignment made during the course of Internship application on Internshala.
 
 
 <details open>
